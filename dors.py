@@ -25,6 +25,12 @@ class OnMessageHook(BaseHook):
     pass
 
 
+class ListenHook(BaseHook):
+    def __init__(self, func, event):
+        self.event = event
+        self.func = func
+
+
 class DorsDiscord(commands.Bot):
     def __init__(self, **options: Any):
         super().__init__(**options)
@@ -68,6 +74,8 @@ class DorsDiscord(commands.Bot):
                 func.func(self)
             elif isinstance(func, OnMessageHook):
                 self.message_hooks.append(func)
+            elif isinstance(func, ListenHook):
+                self.add_listener(func.func, func.event)
 
     async def on_message(self, message: Message) -> None:
         print(f'> <{message.author}>: {message.content}')
@@ -87,5 +95,12 @@ def on_load():
 def on_message():
     def decorator(func):
         return OnMessageHook(func)
+
+    return decorator
+
+
+def listen(event):
+    def decorator(func):
+        return ListenHook(func, event)
 
     return decorator
