@@ -1,10 +1,9 @@
 import os
-from typing import Any, List, Sequence, Dict
+from typing import Any
 
-import disnake
-from disnake import Option, Message, Intents
+from disnake import Message
 from disnake.ext import commands
-from disnake.ext.commands import slash_core, InvokableSlashCommand
+from disnake.ext.commands import InvokableSlashCommand, slash_core
 
 import config
 
@@ -41,9 +40,9 @@ class DorsDiscord(commands.Bot):
         modules = []
         whitelistonly = False
         for module in os.listdir(os.path.dirname("modules/")):
-            if module == '__init__.py' or module[-3:] != '.py':
+            if module.startswith("__"):
                 continue
-            module = module[:-3]
+            module = module.replace(".py", "")
             modules.append(module)
             if module in config.whitelistonly_modules:
                 whitelistonly = True
@@ -78,12 +77,13 @@ class DorsDiscord(commands.Bot):
                 self.add_listener(func.func, func.event)
 
     async def on_message(self, message: Message) -> None:
-        print(f'> <{message.author}>: {message.content}')
+        print(f"> <{message.author}>: {message.content}")
         for func in self.message_hooks:
             await func.func(self, message)
 
 
 slash_command = slash_core.slash_command
+
 
 def on_load():
     def decorator(func):
